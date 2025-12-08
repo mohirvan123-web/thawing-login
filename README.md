@@ -122,7 +122,7 @@
             color: #888;
         }
         .logout-btn-small {
-            padding: 8px 15px;
+            padding: 8px 9px;
             font-size: 0.8em;
             font-weight: 600;
             background-color: #f44336;
