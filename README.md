@@ -3,369 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thawing Sync Reminder</title>
+    <title>Gacoan Timer - Multi Branch</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4A90E2">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://*.firebaseio.com https://www.googleapis.com; font-src 'self' data:;">
-    <script type="text/javascript" src="cordova.js"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     
     <style>
-        /* ==================== 
-           CSS: STYLING DAN RESPONSIVITAS 
-           ==================== */
         :root {
             --color-white: #ffffff;
-            --color-light-bg: #f7f9ff;
-            --color-primary-blue: #4A90E2;
-            --color-accent-pink: #FF69B4;
-            --color-text-dark: #333333;
-            --color-warning: #FFC0CB;
-            --color-alert: #DC3545;
-            --color-syncing: #FFA500;
+            --color-bg: #f4f7f6;
+            --color-primary: #4A90E2;
+            --color-accent: #FF69B4;
+            --color-text-main: #212529; /* Warna font gelap konsisten */
+            --color-text-muted: #6c757d;
+            --color-danger: #dc3545;
+            --color-warning: #ffc107;
         }
         
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--color-light-bg);
-            min-height: 100vh;
+            background-color: var(--color-bg);
+            color: var(--color-text-main);
             margin: 0; 
-            padding: 20px 10px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            transition: background-color 0.2s; 
-            color: var(--color-text-dark);
+            padding: 10px;
+            display: flex; justify-content: center;
         }
 
         .main-container {
-            background-color: var(--color-white);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-            text-align: center;
+            background: var(--color-white);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 850px;
-            box-sizing: border-box; 
-        }
-
-        /* --- STYLING KHUSUS UNTUK LOGIN --- */
-        #auth-container {
-            max-width: 350px;
-            margin: 0 auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background: #fff;
-            text-align: left;
-        }
-        #auth-container h2 {
-            text-align: center;
-            color: var(--color-primary-blue);
-            margin-bottom: 20px;
-            font-weight: 700;
-        }
-        .auth-group {
-            margin-bottom: 15px;
-        }
-        .auth-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            font-size: 0.9em;
-        }
-        .auth-group input[type="email"],
-        .auth-group input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-        }
-        #login-btn, #logout-btn {
-            width: 100%;
-            padding: 8px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 200;
-            background-color: var(--color-primary-blue);
-            color: white;
-            transition: background-color 0.2s;
-        }
-        #error-message {
-            color: var(--color-alert);
-            margin-top: 10px;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        /* --- STYLING HEADER SAAT LOGIN --- */
-        .header-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .header-controls h1 {
-            margin: 0;
-        }
-        .header-controls p {
-            margin: 0;
-            font-size: 0.8em;
-            color: #888;
-        }
-        .logout-btn-small {
-            padding: 8px 15px;
-            font-size: 0.8em;
-            font-weight: 600;
-            background-color: #f44336;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        /* --- STYLING TIMER (SAMA SEPERTI SEBELUMNYA) --- */
-
-        h1 {
-            color: var(--color-primary-blue);
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        p {
-            color: #666;
-            margin-bottom: 25px;
-            font-size: 0.9em;
-        }
-
-        .timer-list {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 20px;
+            max-width: 800px;
             margin-top: 20px;
         }
 
-        .timer-card {
-            border: 1px solid #e0e0e0;
-            padding: 20px;
-            border-radius: 12px;
-            background-color: var(--color-white);
-            transition: all 0.3s;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        }
-
-        .timer-card.running-mode {
-            border-left: 5px solid var(--color-primary-blue); 
-            background-color: #f0f7ff; 
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
-        }
-
-        .timer-card.running-mode h2 {
-            color: var(--color-primary-blue); 
-        }
+        /* Form Login */
+        #auth-container { max-width: 400px; margin: 0 auto; text-align: left; }
+        .auth-group { margin-bottom: 15px; }
+        .auth-group label { display: block; font-weight: 600; margin-bottom: 5px; color: var(--color-text-main); }
+        .auth-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         
-        .timer-card.running-mode .countdown-display {
-            color: var(--color-accent-pink); 
-            animation: none !important; 
-        }
+        #login-btn { width: 100%; padding: 12px; background: var(--color-primary); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
 
-        .timer-card h2 {
-            color: var(--color-accent-pink);
-            padding-bottom: 5px;
-            font-size: 1.3em;
-            font-weight: 600;
-        }
+        /* Header */
+        .header-controls { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #eee; margin-bottom: 20px; padding-bottom: 10px; }
+        .header-controls h1 { margin: 0; color: var(--color-primary); font-size: 1.4em; }
+        .header-controls p { margin: 0; font-size: 0.85em; color: var(--color-text-muted); }
+        .logout-btn { background: var(--color-danger); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8em; font-weight: 600; }
 
-        .countdown-display {
-            font-size: 2.5em;
-            margin: 15px 0 5px 0; 
-            font-weight: 700;
-            color: var(--color-primary-blue);
-        }
+        /* Timer Cards */
+        .timer-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+        .timer-card { border: 2px solid #eee; padding: 20px; border-radius: 12px; position: relative; transition: 0.3s; background: #fff; }
         
-        .end-time-display {
-            font-size: 0.85em;
-            color: #999;
-            margin-bottom: 10px;
-        }
-
-        .alarm-message {
-            color: var(--color-alert);
-            font-weight: 600;
-            margin-top: 10px;
-            font-size: 0.95em;
-        }
-
-        .timer-controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .timer-controls label {
-            font-weight: 400;
-            white-space: nowrap;
-        }
+        .timer-card h2 { margin: 0; color: var(--color-text-main); font-size: 1.2em; font-weight: 700; }
+        .countdown-display { font-size: 2.8em; font-weight: 700; color: var(--color-primary); margin: 10px 0; }
+        .end-time-display { font-size: 0.9em; color: var(--color-text-muted); font-weight: 400; }
         
-        .timer-controls input {
-            padding: 10px 5px;
-            max-width: 60px; 
-            text-align: center; 
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 1em;
-            transition: border-color 0.2s;
-        }
+        /* State Running */
+        .timer-card.running { border-color: var(--color-primary); background: #f0f7ff; }
         
-        .timer-controls input:focus {
-            border-color: var(--color-primary-blue);
-            outline: none;
-        }
+        /* State Alert/Finish */
+        .timer-card.alert { border-color: var(--color-danger); background: #fff5f5; }
+        .timer-card.alert .countdown-display { color: var(--color-danger); }
 
-        .timer-controls button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            flex-grow: 1; 
-            transition: background-color 0.2s, transform 0.1s;
-        }
-        .timer-controls button:active { transform: scale(0.98); }
+        /* Controls */
+        .timer-controls { display: flex; gap: 8px; margin-top: 15px; align-items: center; }
+        .timer-controls input { width: 70px; padding: 8px; text-align: center; border: 1px solid #ccc; border-radius: 6px; font-weight: 700; color: var(--color-text-main); }
+        .btn { flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; }
+        .btn-start { background: var(--color-primary); color: white; }
+        .btn-reset { background: var(--color-text-muted); color: white; }
+        .btn-stop { background: var(--color-danger); color: white; animation: pulse 0.8s infinite alternate; }
 
-        .start-btn.syncing {
-            background-color: var(--color-syncing) !important;
-            color: white;
-            animation: pulse-sync 1s infinite alternate;
-        }
-        
-        .start-btn { 
-            background-color: var(--color-primary-blue); 
-            color: white; 
-        }
-        .start-btn:hover:not(:disabled):not(.syncing) { background-color: #387ad1; }
-        
-        .reset-btn { 
-            background-color: #6c757d; 
-            color: white; 
-        }
-        .reset-btn:hover:not(:disabled) { background-color: #5a6268; }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.03); } }
+        .flash-red { background-color: #ff4d4d !important; }
 
-        .stop-alarm-btn {
-            background-color: var(--color-alert) !important; 
-            color: white;
-            font-size: 1.1em;
-            padding: 10px 15px;
-            animation: pulse-stop 0.5s infinite alternate; 
-        }
-
-        .timer-controls button:disabled {
-            background-color: #999;
-            cursor: not-allowed;
-            color: #ccc;
-        }
-
-        .timer-card.warning {
-            border-color: var(--color-warning);
-            box-shadow: 0 0 10px rgba(255, 192, 203, 0.5);
-            background-color: #fffafa;
-        }
-        .timer-card.warning .countdown-display {
-            color: var(--color-primary-blue); 
-            animation: pulse-warn 1s infinite alternate; 
-        }
-
-        .timer-card.alert {
-            border-color: var(--color-alert);
-            background-color: #ffeff3;
-            box-shadow: 0 0 10px rgba(255, 105, 180, 0.7);
-        }
-        .timer-card.alert .countdown-display {
-            color: var(--color-alert); 
-            font-size: 2.2em;
-            animation: none;
-        }
-        
-        .flash-alarm-red {
-            background-color: #ff4d6d !important;
-            transition: background-color 0.2s; 
-        }
-
-        /* ANIMASI */
-        @keyframes pulse-warn {
-            from { transform: scale(1); opacity: 1; }
-            to { transform: scale(1.01); opacity: 0.9; }
-        }
-        @keyframes pulse-sync {
-            from { background-color: var(--color-syncing); }
-            to { background-color: #ff7f00; }
-        }
-        @keyframes pulse-stop {
-            from { opacity: 1; box-shadow: 0 0 10px rgba(220, 53, 69, 0.7); }
-            to { opacity: 0.8; box-shadow: none; }
-        }
-
-        /* MEDIA QUERY */
-        @media (max-width: 650px) {
-            body { padding: 10px 0; }
-            .main-container { padding: 15px; border-radius: 0; box-shadow: none; max-width: 100%;}
-            .timer-list { grid-template-columns: 1fr; gap: 15px; } 
-            .timer-card { padding: 15px; }
-            .countdown-display { font-size: 2em; margin: 10px 0 5px 0; }
-            .timer-controls { flex-wrap: wrap; gap: 8px; justify-content: space-between; }
-            .timer-controls label { flex-basis: 100%; text-align: left; font-size: 0.9em; }
-            .timer-controls input { max-width: 80px; flex-grow: 0; }
-            .timer-controls button { padding: 10px; font-size: 0.9em; flex-basis: calc(50% - 5px); }
-            .stop-alarm-btn { flex-basis: 100%; } 
-        }
+        @media (max-width: 600px) { .timer-list { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <div class="main-container">
         <div id="auth-container">
-            <h2>Login ke Thawing Timer</h2>
+            <h2 style="text-align: center; color: var(--color-primary);">Login Cabang</h2>
             <div class="auth-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" placeholder="Masukkan email Anda" required>
+                <label>Email Cabang</label>
+                <input type="email" id="email" placeholder="contoh: malang@gacoan.com">
             </div>
             <div class="auth-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" placeholder="Masukkan password Anda" required>
+                <label>Password</label>
+                <input type="password" id="password" placeholder="******">
             </div>
-            <button id="login-btn">LOGIN</button>
-            <p id="error-message" style="display: none;"></p>
+            <button id="login-btn">MASUK KE SISTEM</button>
+            <p id="error-msg" style="color:red; font-size:0.8em; display:none; text-align:center;"></p>
         </div>
 
         <div id="timer-content" style="display: none;">
             <div class="header-controls">
                 <div>
-                    <h1>Gacoan Timer Thawing 🧊</h1>
-                    <p>Malang Jakarta V.1.3 (Alarm Debounced)</p>
+                    <h1 id="branch-title">Gacoan Timer</h1>
+                    <p id="version-tag">V.1.5 - Sync Stable</p>
                 </div>
-                <button id="logout-btn" class="logout-btn-small">LOGOUT</button>
+                <button id="logout-btn" class="logout-btn">LOGOUT</button>
             </div>
-            
-            <div class="timer-list" id="timer-list">
-            </div>
+            <div id="timer-list" class="timer-list"></div>
         </div>
     </div>
 
     <script>
-       // ===================================
-        // FIREBASE CONFIGURATION (JANGAN DIUBAH)
-        // ===================================
+        // 1. CONFIG
         const firebaseConfig = {
           apiKey: "AIzaSyBtUlghTw806GuGuwOXGNgoqN6Rkcg0IMM",
           authDomain: "thawing-ec583.firebaseapp.com",
@@ -373,563 +124,174 @@
           projectId: "thawing-ec583",
           storageBucket: "thawing-ec583.firebasestorage.app", 
           messagingSenderId: "1043079332713",
-          appId: "1:1043079332713:web:6d289ad2b7c13a222bb3f8",
-          measurementId: "G-WLBFJ6V7QT"            
+          appId: "1:1043079332713:web:6d289ad2b7c13a222bb3f8"
         };
 
-        // Initialize Firebase
-        let firebaseApp;
-        try {
-            if (!firebase.apps.length) {
-                 firebaseApp = firebase.initializeApp(firebaseConfig);
-            } else {
-                 firebaseApp = firebase.app();
-            }
-        } catch (e) {
-            console.error("Firebase Initialization Failed. Check your config.", e);
-        }
-        
-        const dbRef = firebase.database().ref('thawingTimers');
-        const auth = firebase.auth(); // Inisiasi Firebase Auth
-        
-        /* ==================== 
-           AUTENTIKASI LOGIC
-           ==================== */
-        
-        const authContainer = document.getElementById('auth-container');
-        const timerContent = document.getElementById('timer-content');
-        const loginBtn = document.getElementById('login-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const errorMessage = document.getElementById('error-message');
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const urlParams = new URLSearchParams(window.location.search);
+        const branchName = urlParams.get('branch') || 'pusat';
+        const dbRef = firebase.database().ref('branches/' + branchName);
 
-        loginBtn.addEventListener('click', () => {
-            const email = emailInput.value;
-            const password = passwordInput.value;
-            errorMessage.style.display = 'none';
+        const THAWING_ITEMS = [
+            { id: 1, name: "ADONAN", time: 40 },
+            { id: 2, name: "ACIN", time: 60 },
+            { id: 3, name: "MIE", time: 120 },
+            { id: 4, name: "PENTOL", time: 120 },
+            { id: 5, name: "SURAI NAGA", time: 120 },
+            { id: 6, name: "KRUPUK MIE", time: 120 },
+            { id: 7, name: "KULIT PANGSIT", time: 120 }
+        ];
 
-            if (!email || !password) {
-                errorMessage.textContent = 'Email dan Password harus diisi.';
-                errorMessage.style.display = 'block';
-                return;
-            }
+        let activeIntervals = {};
 
-            // Gunakan signInWithEmailAndPassword untuk login
-            auth.signInWithEmailAndPassword(email, password)
-                .catch((error) => {
-                    // Tampilkan pesan error jika login gagal
-                    let msg;
-                    switch (error.code) {
-                        case 'auth/user-not-found':
-                            msg = 'Pengguna tidak ditemukan.';
-                            break;
-                        case 'auth/wrong-password':
-                            msg = 'Password salah.';
-                            break;
-                        case 'auth/invalid-email':
-                            msg = 'Format email tidak valid.';
-                            break;
-                        default:
-                            msg = 'Login gagal: ' + error.message;
-                    }
-                    errorMessage.textContent = msg;
-                    errorMessage.style.display = 'block';
-                });
-        });
+        // 2. AUTH HANDLER
+        document.getElementById('login-btn').onclick = () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            auth.signInWithEmailAndPassword(email, pass).catch(e => {
+                const err = document.getElementById('error-msg');
+                err.innerText = "Gagal: " + e.message;
+                err.style.display = 'block';
+            });
+        };
 
-        logoutBtn.addEventListener('click', () => {
-            // Gunakan signOut untuk logout
-            auth.signOut();
-        });
+        document.getElementById('logout-btn').onclick = () => auth.signOut();
 
-        // Listener Status Autentikasi
-        auth.onAuthStateChanged((user) => {
+        auth.onAuthStateChanged(user => {
             if (user) {
-                // Pengguna terautentikasi (Logged in)
-                authContainer.style.display = 'none';
-                timerContent.style.display = 'block';
-                initializeTimerApp(); // Panggil inisiasi aplikasi timer
+                document.getElementById('auth-container').style.display = 'none';
+                document.getElementById('timer-content').style.display = 'block';
+                document.getElementById('branch-title').innerText = `Gacoan (${branchName.toUpperCase()})`;
+                initApp();
             } else {
-                // Pengguna tidak terautentikasi (Logged out)
-                authContainer.style.display = 'block';
-                timerContent.style.display = 'none';
-                // Opsional: Clear input fields
-                passwordInput.value = '';
-                // Hentikan semua listener/interval jika ada
-                cleanupTimerApp(); 
+                document.getElementById('auth-container').style.display = 'block';
+                document.getElementById('timer-content').style.display = 'none';
+                stopGlobalAlarm();
             }
         });
-        
-        /* ==================== 
-           JAVASCRIPT LOGIC (DIPINDAHKAN KE initializeTimerApp)
-           ==================== */
-        
-        function initializeTimerApp() {
-            // --- KONFIGURASI APLIKASI ---
-            const THAWING_ITEMS = [
-                { id: 1, name: "ADONAN", defaultTimeMinutes: 40 },
-                { id: 2, name: "ACIN", defaultTimeMinutes: 60 },
-                { id: 3, name: "MIE", defaultTimeMinutes: 120 },
-                { id: 4, name: "PENTOL", defaultTimeMinutes: 120 },
-                { id: 5, name: "SURAI NAGA", defaultTimeMinutes: 120 },
-                { id: 6, name: "KRUPUK MIE", defaultTimeMinutes: 120 },
-                { id: 7, name: "KULIT PANGSIT", defaultTimeMinutes: 120 },
-            ];
+
+        // 3. CORE LOGIC
+        function initApp() {
+            const container = document.getElementById('timer-list');
+            container.innerHTML = '';
             
-            const WARNING_TIME_SECONDS = 15 * 60; 
-            let activeIntervals = {}; 
-            let notificationPermission = Notification.permission;
-            
-            let titleInterval = null;
-            let flashInterval = null;
-            const originalTitle = document.title;
-            const WARNING_TITLE_PREFIX = '🚨 HABIS! - ';
-            const FLASH_COLOR_CLASS = 'flash-alarm-red'; 
-
-            let isSpeaking = false; 
-            const speechQueue = []; 
-            
-            // Fungsi Format Waktu
-            function formatTime(totalSeconds) {
-                totalSeconds = Math.max(0, totalSeconds); 
-                const hours = Math.floor(totalSeconds / 3600);
-                const minutes = Math.floor((totalSeconds % 3600) / 60);
-                const seconds = totalSeconds % 60;
-                const h = String(hours).padStart(2, '0');
-                const m = String(minutes).padStart(2, '0');
-                const s = String(seconds).padStart(2, '0');
-                return `${h}:${m}:${s}`;
-            }
-            
-            // =================================================
-            // 🚨 FUNGSI ALARM AGRESIF DAN DEBOUNCING AUDIO
-            // =================================================
-            
-            function resumeAudioContext() {
-                 if (!window.audioCtx) {
-                     window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                 }
-                 if (window.audioCtx.state === 'suspended') {
-                     window.audioCtx.resume().catch(e => console.error("Failed to resume AudioContext:", e));
-                 }
-            }
-            
-            function processQueue() {
-                if (isSpeaking || speechQueue.length === 0) {
-                    return; 
-                }
-
-                isSpeaking = true;
-                const message = speechQueue.shift(); 
-
-                window.speechSynthesis.cancel(); 
-                
-                const utterance = new SpeechSynthesisUtterance(message);
-                
-                const voices = window.speechSynthesis.getVoices();
-                const indoVoice = voices.find(v => v.lang.startsWith('id'));
-                
-                if (indoVoice) {
-                    utterance.voice = indoVoice;
-                } else {
-                    utterance.lang = 'id-ID';
-                }
-                
-                utterance.rate = 1.0; 
-                utterance.volume = 1.0; 
-                
-                utterance.onend = () => {
-                    isSpeaking = false; 
-                    processQueue(); 
-                };
-                utterance.onerror = () => {
-                    isSpeaking = false; 
-                    processQueue(); 
-                };
-                
-                window.speechSynthesis.speak(utterance);
-            }
-
-            function speakMessage(message) {
-                if ('speechSynthesis' in window) {
-                    if (!speechQueue.includes(message)) {
-                        speechQueue.push(message); 
-                    }
-                    processQueue(); 
-                } else {
-                    console.warn("Web Speech API tidak didukung.");
-                }
-            }
-
-            function sendNotification(itemName) {
-                if (notificationPermission === 'granted') {
-                    new Notification("⏰ WAKTU THAWING HABIS!", {
-                        body: `🚨 Segera ambil bahan: ${itemName}.`,
-                        tag: 'thawing-alarm',
-                        renotify: true, 
-                        requireInteraction: true 
-                    }).onclick = function() {
-                        window.focus(); 
-                        this.close();
-                        stopAggressiveAlarm(); 
-                    };
-                }
-            }
-
-            function startVibrationAlert() {
-                if ('vibrate' in navigator) {
-                    const pattern = [1000, 500, 1000]; 
-                    navigator.vibrate(pattern);
-                }
-            }
-
-            function startFlashAlarm() {
-                if (flashInterval) return;
-                let isFlashing = false;
-                flashInterval = setInterval(() => {
-                    isFlashing = !isFlashing;
-                    document.body.classList.toggle(FLASH_COLOR_CLASS, isFlashing);
-                }, 200);
-            }
-
-            function startTitleAlert(itemName) {
-                if (titleInterval) return;
-                let isAlertState = false;
-                titleInterval = setInterval(() => {
-                    isAlertState = !isAlertState;
-                    document.title = isAlertState 
-                        ? WARNING_TITLE_PREFIX + itemName 
-                        : originalTitle;
-                }, 800);
-            }
-
-            function stopAggressiveAlarm() {
-                if (titleInterval) {
-                    clearInterval(titleInterval);
-                    titleInterval = null;
-                }
-                if (flashInterval) {
-                    clearInterval(flashInterval);
-                    flashInterval = null;
-                }
-                document.title = originalTitle;
-                document.body.classList.remove(FLASH_COLOR_CLASS);
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel(); 
-                }
-                if ('vibrate' in navigator) {
-                     navigator.vibrate(0); 
-                }
-                isSpeaking = false; 
-                speechQueue.length = 0; 
-            }
-            
-            function tick(itemId, endTimeMs, inputMinutes, timerState) {
-                // ... (Logika tick yang sama persis) ...
-                const timerCard = document.getElementById(`card-${itemId}`);
-                if (!timerCard) return;
-
-                if (!timerCard.classList.contains('running-mode')) {
-                    timerCard.classList.add('running-mode');
-                }
-
-                const display = document.getElementById(`display-${itemId}`);
-                const alarmMessage = document.getElementById(`msg-${itemId}`);
-                const endTimeDisplay = document.getElementById(`end-time-${itemId}`);
-                const item = THAWING_ITEMS.find(i => i.id === itemId);
-                const itemName = item ? item.name : 'Bahan';
-                
-                clearTimeout(activeIntervals[itemId]);
-
-                const now = Date.now();
-                let duration = Math.floor((endTimeMs - now) / 1000); 
-                
-                const inputTime = document.getElementById(`time-input-${itemId}`);
-                const startButton = document.getElementById(`start-btn-${itemId}`);
-                const resetButton = document.getElementById(`reset-btn-${itemId}`);
-                
-                if (inputTime) inputTime.value = inputMinutes; 
-                if (inputTime) inputTime.readOnly = true;
-                if (startButton) startButton.style.display = 'none';
-                if (resetButton) {
-                    resetButton.style.display = 'block';
-                    resetButton.textContent = 'RESET'; 
-                    resetButton.classList.remove('stop-alarm-btn');
-                }
-                
-                const formattedEndTime = new Date(endTimeMs).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                if (endTimeDisplay) endTimeDisplay.textContent = `Selesai: ${formattedEndTime}`;
-
-                if (duration >= 0) {
-                     display.textContent = formatTime(duration);
-                }
-               
-                if (duration <= WARNING_TIME_SECONDS && duration > 0) {
-                    if (!timerCard.classList.contains('warning')) {
-                        timerCard.classList.add('warning');
-                        timerCard.classList.remove('alert'); 
-                        const remainingMinutes = Math.ceil(duration / 60);
-                        alarmMessage.textContent = `🔔 PERINGATAN! ${itemName} tersisa ${remainingMinutes} menit.`;
-                        alarmMessage.style.display = 'block';
-                    }
-                } else if (duration > WARNING_TIME_SECONDS) {
-                     timerCard.classList.remove('warning');
-                     alarmMessage.style.display = 'none';
-                }
-
-                if (duration <= WARNING_TIME_SECONDS && duration > 0 && duration % 30 === 0) {
-                    const remainingMinutes = Math.ceil(duration / 60);
-                    speakMessage(`Perhatian! Waktu thawing ${itemName} kurang ${remainingMinutes} menit.`); 
-                }
-                
-                if (duration <= 0) {
-                    clearTimeout(activeIntervals[itemId]);
-                    delete activeIntervals[itemId];
-                    
-                    if (timerState) { 
-                        dbRef.child(itemId).remove().catch(e => console.log('Hapus item gagal.'));
-                    }
-                    
-                    display.textContent = "WAKTU HABIS!";
-                    timerCard.classList.remove('warning');
-                    timerCard.classList.add('alert'); 
-                    alarmMessage.textContent = `✅ SELESAI! Bahan ${itemName} butuh penanganan.`;
-                    alarmMessage.style.display = 'block';
-                    
-                    if (resetButton) {
-                        resetButton.textContent = 'STOP ALARM & AMBIL'; 
-                        resetButton.classList.add('stop-alarm-btn'); 
-                        resetButton.style.display = 'block'; 
-                    }
-                    
-                    sendNotification(itemName);
-                    startVibrationAlert(); 
-                    startTitleAlert(itemName);
-                    startFlashAlarm();
-                    speakMessage(`PERINGATAN KERAS! Waktu thawing ${itemName} telah habis! Segera ambil bahan!`); 
-                    
-                    return; 
-                }
-                
-                activeIntervals[itemId] = setTimeout(() => tick(itemId, endTimeMs, inputMinutes, timerState), 1000);
-            }
-
-            function startCountdown(itemId) {
-                resumeAudioContext(); 
-                Notification.requestPermission().then(permission => {
-                    notificationPermission = permission; 
-                });
-                
-                const inputTime = document.getElementById(`time-input-${itemId}`);
-                const startButton = document.getElementById(`start-btn-${itemId}`);
-                const durationMinutes = parseInt(inputTime.value);
-
-                if (isNaN(durationMinutes) || durationMinutes <= 0) {
-                    alert(`Mohon masukkan waktu thawing yang valid.`);
-                    return;
-                }
-                
-                const timerCard = document.getElementById(`card-${itemId}`);
-                if (timerCard) timerCard.classList.add('running-mode');
-
-                startButton.textContent = "SYNCING...";
-                startButton.classList.add('syncing');
-                startButton.disabled = true; 
-                
-                const durationMs = durationMinutes * 60 * 1000;
-                const endTimeMs = Date.now() + durationMs; 
-                
-                dbRef.child(itemId).set({ 
-                    endTime: endTimeMs, 
-                    inputMinutes: durationMinutes 
-                })
-                .then(() => {
-                    console.log(`Timer ${itemId} started and synced.`);
-                })
-                .catch(error => {
-                    alert("Gagal memulai timer. Periksa koneksi atau aturan Firebase.");
-                    console.error(error);
-                    localResetUI(itemId, durationMinutes); 
-                });
-            }
-
-            function resetTimer(itemId) {
-                const resetButton = document.getElementById(`reset-btn-${itemId}`);
-                
-                if (resetButton) {
-                    resetButton.style.display = 'none'; 
-                }
-                
-                stopAggressiveAlarm(); 
-                
-                dbRef.child(itemId).remove()
-                .then(() => {
-                    console.log(`Timer ${itemId} reset/stopped and synced.`);
-                })
-                .catch(error => {
-                    alert("Gagal mereset timer. Periksa koneksi atau aturan Firebase.");
-                    console.error(error);
-                    if (resetButton) {
-                        resetButton.style.display = 'block'; 
-                    }
-                });
-            }
-
-            function localResetUI(itemId, inputMinutes = null) {
-                const item = THAWING_ITEMS.find(i => i.id === itemId);
-                if (!item) return;
-
-                const finalInput = inputMinutes !== null ? inputMinutes : item.defaultTimeMinutes;
-                
-                clearTimeout(activeIntervals[itemId]);
-                delete activeIntervals[itemId];
-
-                const timerCard = document.getElementById(`card-${itemId}`);
-                const inputTime = document.getElementById(`time-input-${itemId}`);
-                const display = document.getElementById(`display-${itemId}`);
-                const endTimeDisplay = document.getElementById(`end-time-${itemId}`);
-                const alarmMessage = document.getElementById(`msg-${itemId}`);
-                const startButton = document.getElementById(`start-btn-${itemId}`);
-                const resetButton = document.getElementById(`reset-btn-${itemId}`);
-                
-                if (!timerCard || !inputTime || !display || !startButton || !resetButton) return; 
-
-                timerCard.classList.remove('alert', 'warning', 'running-mode');
-                startButton.classList.remove('syncing'); 
-                inputTime.readOnly = false;
-                startButton.style.display = 'block';
-                startButton.textContent = 'START';
-                startButton.disabled = false;
-                
-                resetButton.style.display = 'none';
-                resetButton.textContent = 'RESET'; 
-                resetButton.classList.remove('stop-alarm-btn'); 
-
-                alarmMessage.style.display = 'none';
-
-                inputTime.value = finalInput;
-                display.textContent = formatTime(finalInput * 60);
-                if (endTimeDisplay) endTimeDisplay.textContent = 'Durasi default';
-
-                if (!timerCard.classList.contains('alert')) {
-                    setTimeout(() => {
-                        inputTime.focus();
-                    }, 100); 
-                }
-            }
-
-            function createTimerCard(item) {
-                const timerListContainer = document.getElementById('timer-list');
-                
-                // Pastikan kontainer dikosongkan jika dipanggil ulang
-                if (document.getElementById(`card-${item.id}`)) return; 
-                
-                const card = document.createElement('div');
-                card.className = 'timer-card';
-                card.id = `card-${item.id}`;
-                
-                card.innerHTML = `
+            THAWING_ITEMS.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'timer-card';
+                div.id = `card-${item.id}`;
+                div.innerHTML = `
                     <h2>${item.name}</h2>
-                    <div id="display-${item.id}" class="countdown-display">
-                        ${formatTime(item.defaultTimeMinutes * 60)}
-                    </div>
-                    
-                    <div id="end-time-${item.id}" class="end-time-display">Durasi default</div> 
-
-                    <div id="msg-${item.id}" class="alarm-message" style="display: none;"></div>
-
+                    <div class="countdown-display" id="display-${item.id}">--:--:--</div>
+                    <div class="end-time-display" id="end-${item.id}">Standby</div>
                     <div class="timer-controls">
-                        <label for="time-input-${item.id}">Durasi (mnt):</label>
-                        <input type="number" id="time-input-${item.id}" value="${item.defaultTimeMinutes}" min="1" max="180">
-                        <button id="start-btn-${item.id}" class="start-btn">START</button>
-                        <button id="reset-btn-${item.id}" class="reset-btn" style="display: none;">RESET</button>
+                        <input type="number" id="input-${item.id}" value="${item.time}">
+                        <button class="btn btn-start" id="btn-start-${item.id}">START</button>
+                        <button class="btn btn-reset" id="btn-reset-${item.id}" style="display:none">RESET</button>
                     </div>
                 `;
-                
-                timerListContainer.appendChild(card);
-                
-                document.getElementById(`start-btn-${item.id}`).addEventListener('click', () => startCountdown(item.id));
-                document.getElementById(`reset-btn-${item.id}`).addEventListener('click', () => resetTimer(item.id));
+                container.appendChild(div);
 
-                document.getElementById(`time-input-${item.id}`).addEventListener('input', (event) => {
-                    const minutes = parseInt(event.target.value) || 0;
-                    const display = document.getElementById(`display-${item.id}`);
-                    const endTimeDisplay = document.getElementById(`end-time-${item.id}`);
-                    
-                    if (!document.getElementById(`time-input-${item.id}`).readOnly) {
-                        display.textContent = formatTime(minutes * 60);
-                        if (endTimeDisplay) endTimeDisplay.textContent = 'Durasi custom';
+                document.getElementById(`btn-start-${item.id}`).onclick = () => {
+                    const m = parseInt(document.getElementById(`input-${item.id}`).value);
+                    const end = Date.now() + (m * 60 * 1000);
+                    dbRef.child(item.id).set({ end, m });
+                };
+
+                document.getElementById(`btn-reset-${item.id}`).onclick = () => {
+                    dbRef.child(item.id).remove();
+                    stopGlobalAlarm();
+                };
+            });
+
+            // Sinkronisasi Realtime
+            dbRef.on('value', snap => {
+                const data = snap.val() || {};
+                THAWING_ITEMS.forEach(item => {
+                    const state = data[item.id];
+                    if (state) {
+                        updateTimer(item.id, state.end, state.m);
+                    } else {
+                        clearLocalTimer(item.id);
                     }
                 });
-                
-                localResetUI(item.id, item.defaultTimeMinutes);
-            }
-
-            // ===================================
-            // 🚨 LOGIKA SINKRONISASI REAL-TIME
-            // ===================================
-            
-            // Bersihkan kontainer sebelum inisiasi ulang
-            document.getElementById('timer-list').innerHTML = '';
-            THAWING_ITEMS.forEach(item => {
-                createTimerCard(item);
             });
-            notificationPermission = Notification.permission;
-            
-            // Tambahkan listener Firebase HANYA SEKALI
-            if (!dbRef.initialized) {
-                 dbRef.initialized = true; // Flag untuk mencegah inisiasi ganda
-                 dbRef.on('value', (snapshot) => {
-                    const timersData = snapshot.val() || {}; 
-
-                    THAWING_ITEMS.forEach(item => {
-                        const itemId = item.id;
-                        const timerState = timersData[itemId];
-                        
-                        if (timerState && timerState.endTime) {
-                            const endTime = timerState.endTime;
-                            const inputMinutes = timerState.inputMinutes || item.defaultTimeMinutes;
-                            tick(itemId, endTime, inputMinutes, timerState);
-                            
-                            const startButton = document.getElementById(`start-btn-${itemId}`);
-                             if (startButton) {
-                                 startButton.classList.remove('syncing');
-                             }
-
-                        } else {
-                            clearTimeout(activeIntervals[itemId]);
-                            delete activeIntervals[itemId];
-                            localResetUI(itemId, item.defaultTimeMinutes); 
-                        }
-                    });
-                });
-            }
-            
-            // PWA SERVICE WORKER REGISTRATION
-            if ('serviceWorker' in navigator) {
-              window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                  .then(registration => console.log('ServiceWorker registered'))
-                  .catch(error => console.error('ServiceWorker registration failed:', error));
-              });
-            }
-        } // End initializeTimerApp
-
-        function cleanupTimerApp() {
-             // Opsional: Hentikan listener Firebase jika Anda ingin sepenuhnya menghentikan sinkronisasi saat logout.
-             // Namun, untuk aplikasi real-time seperti ini, biasanya listener dibiarkan aktif atau hanya
-             // dihentikan jika ada masalah performa yang jelas.
-             // dbRef.off();
-             
-             // Hentikan semua interval lokal
-             for (const id in activeIntervals) {
-                 clearTimeout(activeIntervals[id]);
-             }
-             activeIntervals = {};
-             stopAggressiveAlarm();
         }
 
+        function updateTimer(id, end, m) {
+            clearInterval(activeIntervals[id]);
+            const display = document.getElementById(`display-${id}`);
+            const card = document.getElementById(`card-${id}`);
+            const input = document.getElementById(`input-${id}`);
+            const btnS = document.getElementById(`btn-start-${id}`);
+            const btnR = document.getElementById(`btn-reset-${id}`);
+            const endTxt = document.getElementById(`end-${id}`);
+
+            input.readOnly = true;
+            btnS.style.display = 'none';
+            btnR.style.display = 'block';
+            card.classList.add('running');
+            endTxt.innerText = "Selesai jam: " + new Date(end).toLocaleTimeString('id-ID',{hour:'2-digit', minute:'2-digit'});
+
+            activeIntervals[id] = setInterval(() => {
+                const now = Date.now();
+                const diff = Math.floor((end - now) / 1000);
+
+                if (diff <= 0) {
+                    clearInterval(activeIntervals[id]);
+                    display.innerText = "WAKTU HABIS!";
+                    card.classList.add('alert');
+                    btnR.innerText = "STOP & AMBIL";
+                    btnR.className = "btn btn-stop";
+                    triggerAlarm(id);
+                } else {
+                    const hrs = Math.floor(diff / 3600);
+                    const mins = Math.floor((diff % 3600) / 60);
+                    const secs = diff % 60;
+                    display.innerText = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+                }
+            }, 1000);
+        }
+
+        function clearLocalTimer(id) {
+            clearInterval(activeIntervals[id]);
+            const item = THAWING_ITEMS.find(i => i.id === id);
+            const card = document.getElementById(`card-${id}`);
+            if (!card) return;
+
+            card.className = 'timer-card';
+            document.getElementById(`display-${id}`).innerText = "00:00:00";
+            document.getElementById(`input-${id}`).readOnly = false;
+            document.getElementById(`input-${id}`).value = item.time;
+            document.getElementById(`btn-start-${id}`).style.display = 'block';
+            const rb = document.getElementById(`btn-reset-${id}`);
+            rb.style.display = 'none';
+            rb.innerText = "RESET";
+            rb.className = "btn btn-reset";
+            document.getElementById(`end-${id}`).innerText = "Standby";
+        }
+
+        // 4. ALARM SYSTEM
+        let globalAlarmId = null;
+        function triggerAlarm(id) {
+            if (globalAlarmId) return;
+            const item = THAWING_ITEMS.find(i => i.id === id);
+            globalAlarmId = setInterval(() => {
+                document.body.classList.toggle('flash-red');
+                if ('speechSynthesis' in window && !speechSynthesis.speaking) {
+                    const utter = new SpeechSynthesisUtterance(`${item.name} HABIS`);
+                    utter.lang = 'id-ID';
+                    speechSynthesis.speak(utter);
+                }
+            }, 1000);
+        }
+
+        function stopGlobalAlarm() {
+            clearInterval(globalAlarmId);
+            globalAlarmId = null;
+            document.body.classList.remove('flash-red');
+            if ('speechSynthesis' in window) speechSynthesis.cancel();
+        }
     </script>
 </body>
 </html>
