@@ -3,294 +3,301 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gacoan Timer - Multi Branch</title>
+    <title>Gacoan Thawing Timer - Sync</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4A90E2">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://*.firebaseio.com https://www.googleapis.com; font-src 'self' data:;">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     
     <style>
+        /* ==================== 
+           CSS: STYLING 
+           ==================== */
         :root {
             --color-white: #ffffff;
-            --color-bg: #f4f7f6;
-            --color-primary: #4A90E2;
-            --color-accent: #FF69B4;
-            --color-text-main: #212529; /* Warna font gelap konsisten */
-            --color-text-muted: #6c757d;
-            --color-danger: #dc3545;
-            --color-warning: #ffc107;
+            --color-light-bg: #f7f9ff;
+            --color-primary-blue: #4A90E2;
+            --color-accent-pink: #FF69B4;
+            --color-text-dark: #333333;
+            --color-warning: #FFC0CB;
+            --color-alert: #DC3545;
         }
         
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--color-bg);
-            color: var(--color-text-main);
-            margin: 0; 
-            padding: 10px;
-            display: flex; justify-content: center;
+            background-color: var(--color-light-bg);
+            min-height: 100vh;
+            margin: 0; padding: 20px 10px;
+            display: flex; justify-content: center; align-items: flex-start;
+            transition: background-color 0.2s; color: var(--color-text-dark);
         }
 
         .main-container {
-            background: var(--color-white);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 800px;
-            margin-top: 20px;
+            background-color: var(--color-white);
+            padding: 30px; border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            text-align: center; width: 100%; max-width: 850px;
         }
 
-        /* Form Login */
-        #auth-container { max-width: 400px; margin: 0 auto; text-align: left; }
+        /* --- LOGIN --- */
+        #auth-container { max-width: 350px; margin: 0 auto; text-align: left; }
         .auth-group { margin-bottom: 15px; }
-        .auth-group label { display: block; font-weight: 600; margin-bottom: 5px; color: var(--color-text-main); }
-        .auth-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .auth-group label { display: block; font-weight: 600; margin-bottom: 5px; }
+        .auth-group input, #branch-select {
+            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
+        }
+        #login-btn {
+            width: 100%; padding: 12px; border: none; border-radius: 6px;
+            background: var(--color-primary-blue); color: white; font-weight: 700; cursor: pointer;
+        }
+
+        /* --- TIMER --- */
+        .header-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .logout-btn-small { padding: 8px 15px; background: #f44336; color: white; border: none; border-radius: 6px; cursor: pointer; }
         
-        #login-btn { width: 100%; padding: 12px; background: var(--color-primary); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
-
-        /* Header */
-        .header-controls { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #eee; margin-bottom: 20px; padding-bottom: 10px; }
-        .header-controls h1 { margin: 0; color: var(--color-primary); font-size: 1.4em; }
-        .header-controls p { margin: 0; font-size: 0.85em; color: var(--color-text-muted); }
-        .logout-btn { background: var(--color-danger); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8em; font-weight: 600; }
-
-        /* Timer Cards */
-        .timer-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
-        .timer-card { border: 2px solid #eee; padding: 20px; border-radius: 12px; position: relative; transition: 0.3s; background: #fff; }
+        .timer-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .timer-card { border: 1px solid #e0e0e0; padding: 20px; border-radius: 12px; transition: all 0.3s; }
+        .timer-card.running-mode { border-left: 5px solid var(--color-primary-blue); background: #f0f7ff; }
+        .timer-card h2 { color: var(--color-accent-pink); margin: 0; font-size: 1.2em; }
         
-        .timer-card h2 { margin: 0; color: var(--color-text-main); font-size: 1.2em; font-weight: 700; }
-        .countdown-display { font-size: 2.8em; font-weight: 700; color: var(--color-primary); margin: 10px 0; }
-        .end-time-display { font-size: 0.9em; color: var(--color-text-muted); font-weight: 400; }
+        .countdown-display { font-size: 2.5em; font-weight: 700; color: var(--color-primary-blue); margin: 10px 0; }
+        .end-time-display { font-size: 0.85em; color: #999; }
+        .alarm-message { color: var(--color-alert); font-weight: 600; font-size: 0.9em; margin-top: 5px; }
+
+        .timer-controls { display: flex; gap: 8px; margin-top: 15px; justify-content: center; align-items: center; }
+        .timer-controls input { width: 60px; text-align: center; padding: 8px; border-radius: 6px; border: 1px solid #ddd; }
+        .start-btn { background: var(--color-primary-blue); color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; flex-grow: 1; }
+        .reset-btn { background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; }
         
-        /* State Running */
-        .timer-card.running { border-color: var(--color-primary); background: #f0f7ff; }
-        
-        /* State Alert/Finish */
-        .timer-card.alert { border-color: var(--color-danger); background: #fff5f5; }
-        .timer-card.alert .countdown-display { color: var(--color-danger); }
+        .stop-alarm-btn { background: var(--color-alert) !important; animation: pulse-stop 0.5s infinite alternate; }
+        .flash-alarm-red { background-color: #ff4d6d !important; }
 
-        /* Controls */
-        .timer-controls { display: flex; gap: 8px; margin-top: 15px; align-items: center; }
-        .timer-controls input { width: 70px; padding: 8px; text-align: center; border: 1px solid #ccc; border-radius: 6px; font-weight: 700; color: var(--color-text-main); }
-        .btn { flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; }
-        .btn-start { background: var(--color-primary); color: white; }
-        .btn-reset { background: var(--color-text-muted); color: white; }
-        .btn-stop { background: var(--color-danger); color: white; animation: pulse 0.8s infinite alternate; }
-
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.03); } }
-        .flash-red { background-color: #ff4d4d !important; }
-
+        @keyframes pulse-stop { from { opacity: 1; } to { opacity: 0.7; } }
         @media (max-width: 600px) { .timer-list { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <div class="main-container">
         <div id="auth-container">
-            <h2 style="text-align: center; color: var(--color-primary);">Login Cabang</h2>
+            <h2 style="text-align: center; color: var(--color-primary-blue);">Login Thawing Timer</h2>
             <div class="auth-group">
-                <label>Email Cabang</label>
-                <input type="email" id="email" placeholder="contoh: malang@gacoan.com">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="Email Cabang">
             </div>
             <div class="auth-group">
                 <label>Password</label>
-                <input type="password" id="password" placeholder="******">
+                <input type="password" id="password" placeholder="Password">
             </div>
-            <button id="login-btn">MASUK KE SISTEM</button>
-            <p id="error-msg" style="color:red; font-size:0.8em; display:none; text-align:center;"></p>
+            <div class="auth-group">
+                <label>Pilih Cabang</label>
+                <select id="branch-select">
+                    <option value="Cabang_1">Cabang 1 (MLGJAK)</option>
+                    <option value="Cabang_2">Cabang 2 (MLGMON)</option>
+                </select>
+            </div>
+            <button id="login-btn">MASUK</button>
         </div>
 
         <div id="timer-content" style="display: none;">
             <div class="header-controls">
-                <div>
-                    <h1 id="branch-title">Gacoan Timer</h1>
-                    <p id="version-tag">V.1.5 - Sync Stable</p>
+                <div style="text-align: left;">
+                    <h1 id="branch-title" style="margin:0; font-size: 1.5em;">Gacoan Timer</h1>
+                    <p style="margin:0;">V.1.4 (Multi-Branch & Auto-Voice)</p>
                 </div>
-                <button id="logout-btn" class="logout-btn">LOGOUT</button>
+                <button id="logout-btn" class="logout-btn-small">LOGOUT</button>
             </div>
-            <div id="timer-list" class="timer-list"></div>
+            
+            <div class="timer-list" id="timer-list"></div>
         </div>
     </div>
 
     <script>
-        // 1. CONFIG
+        // --- KONFIGURASI FIREBASE ---
         const firebaseConfig = {
-          apiKey: "AIzaSyBtUlghTw806GuGuwOXGNgoqN6Rkcg0IMM",
-          authDomain: "thawing-ec583.firebaseapp.com",
-          databaseURL: "https://thawing-ec583-default-rtdb.asia-southeast1.firebasedatabase.app",
-          projectId: "thawing-ec583",
-          storageBucket: "thawing-ec583.firebasestorage.app", 
-          messagingSenderId: "1043079332713",
-          appId: "1:1043079332713:web:6d289ad2b7c13a222bb3f8"
+            apiKey: "AIzaSyBtUlghTw806GuGuwOXGNgoqN6Rkcg0IMM",
+            authDomain: "thawing-ec583.firebaseapp.com",
+            databaseURL: "https://thawing-ec583-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "thawing-ec583",
+            storageBucket: "thawing-ec583.firebasestorage.app",
+            messagingSenderId: "1043079332713",
+            appId: "1:1043079332713:web:6d289ad2b7c13a222bb3f8"
         };
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const urlParams = new URLSearchParams(window.location.search);
-        const branchName = urlParams.get('branch') || 'pusat';
-        const dbRef = firebase.database().ref('branches/' + branchName);
-
-        const THAWING_ITEMS = [
-            { id: 1, name: "ADONAN", time: 40 },
-            { id: 2, name: "ACIN", time: 60 },
-            { id: 3, name: "MIE", time: 120 },
-            { id: 4, name: "PENTOL", time: 120 },
-            { id: 5, name: "SURAI NAGA", time: 120 },
-            { id: 6, name: "KRUPUK MIE", time: 120 },
-            { id: 7, name: "KULIT PANGSIT", time: 120 }
-        ];
-
+        let currentDbRef = null;
         let activeIntervals = {};
+        let isSpeaking = false;
+        let speechQueue = [];
 
-        // 2. AUTH HANDLER
-        document.getElementById('login-btn').onclick = () => {
+        // --- AUTH LOGIC ---
+        document.getElementById('login-btn').addEventListener('click', () => {
             const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            auth.signInWithEmailAndPassword(email, pass).catch(e => {
-                const err = document.getElementById('error-msg');
-                err.innerText = "Gagal: " + e.message;
-                err.style.display = 'block';
-            });
-        };
+            const password = document.getElementById('password').value;
+            auth.signInWithEmailAndPassword(email, password).catch(err => alert("Gagal: " + err.message));
+        });
 
-        document.getElementById('logout-btn').onclick = () => auth.signOut();
+        document.getElementById('logout-btn').addEventListener('click', () => auth.signOut());
 
-        auth.onAuthStateChanged(user => {
+        auth.onAuthStateChanged((user) => {
             if (user) {
+                const branch = document.getElementById('branch-select').value;
+                currentDbRef = firebase.database().ref(`thawingTimers/${branch}`);
                 document.getElementById('auth-container').style.display = 'none';
                 document.getElementById('timer-content').style.display = 'block';
-                document.getElementById('branch-title').innerText = `Gacoan (${branchName.toUpperCase()})`;
+                document.getElementById('branch-title').innerText = `Gacoan - ${branch.replace('_', ' ')}`;
                 initApp();
             } else {
                 document.getElementById('auth-container').style.display = 'block';
                 document.getElementById('timer-content').style.display = 'none';
-                stopGlobalAlarm();
+                cleanup();
             }
         });
 
-        // 3. CORE LOGIC
+        // --- VOICE LOGIC ---
+        function processQueue() {
+            if (isSpeaking || speechQueue.length === 0) return;
+            isSpeaking = true;
+            const msg = speechQueue.shift();
+            window.speechSynthesis.cancel();
+            const ut = new SpeechSynthesisUtterance(msg);
+            ut.lang = 'id-ID';
+            ut.onend = () => { isSpeaking = false; processQueue(); };
+            ut.onerror = () => { isSpeaking = false; processQueue(); };
+            window.speechSynthesis.speak(ut);
+        }
+
+        function speak(msg) {
+            if (!speechQueue.includes(msg)) speechQueue.push(msg);
+            processQueue();
+        }
+
+        // --- CORE APP ---
         function initApp() {
-            const container = document.getElementById('timer-list');
-            container.innerHTML = '';
-            
-            THAWING_ITEMS.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'timer-card';
-                div.id = `card-${item.id}`;
-                div.innerHTML = `
+            const ITEMS = [
+                { id: 1, name: "ADONAN", time: 40 },
+                { id: 2, name: "ACIN", time: 120 },
+                { id: 3, name: "MIE", time: 120 },
+                { id: 4, name: "PENTOL", time: 120 },
+                { id: 5, name: "SURAI NAGA", time: 120 },
+                { id: 6, name: "KRUPUK MIE", time: 120 },
+                { id: 7, name: "KULIT PANGSIT", time: 120 }
+            ];
+
+            const list = document.getElementById('timer-list');
+            list.innerHTML = '';
+
+            ITEMS.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'timer-card';
+                card.id = `card-${item.id}`;
+                card.innerHTML = `
                     <h2>${item.name}</h2>
-                    <div class="countdown-display" id="display-${item.id}">--:--:--</div>
-                    <div class="end-time-display" id="end-${item.id}">Standby</div>
+                    <div id="display-${item.id}" class="countdown-display">00:00:00</div>
+                    <div id="end-time-${item.id}" class="end-time-display">Ready</div>
+                    <div id="msg-${item.id}" class="alarm-message" style="display:none"></div>
                     <div class="timer-controls">
                         <input type="number" id="input-${item.id}" value="${item.time}">
-                        <button class="btn btn-start" id="btn-start-${item.id}">START</button>
-                        <button class="btn btn-reset" id="btn-reset-${item.id}" style="display:none">RESET</button>
-                    </div>
-                `;
-                container.appendChild(div);
-
-                document.getElementById(`btn-start-${item.id}`).onclick = () => {
-                    const m = parseInt(document.getElementById(`input-${item.id}`).value);
-                    const end = Date.now() + (m * 60 * 1000);
-                    dbRef.child(item.id).set({ end, m });
-                };
-
-                document.getElementById(`btn-reset-${item.id}`).onclick = () => {
-                    dbRef.child(item.id).remove();
-                    stopGlobalAlarm();
-                };
+                        <button class="start-btn" onclick="triggerStart(${item.id})">START</button>
+                        <button class="reset-btn" id="res-${item.id}" style="display:none" onclick="triggerReset(${item.id})">RESET</button>
+                    </div>`;
+                list.appendChild(card);
             });
 
-            // Sinkronisasi Realtime
-            dbRef.on('value', snap => {
+            currentDbRef.on('value', snap => {
                 const data = snap.val() || {};
-                THAWING_ITEMS.forEach(item => {
-                    const state = data[item.id];
-                    if (state) {
-                        updateTimer(item.id, state.end, state.m);
+                ITEMS.forEach(item => {
+                    if (data[item.id]) {
+                        runTick(item.id, data[item.id].endTime, item.name);
                     } else {
-                        clearLocalTimer(item.id);
+                        stopTick(item.id, item.time);
                     }
                 });
             });
         }
 
-        function updateTimer(id, end, m) {
-            clearInterval(activeIntervals[id]);
-            const display = document.getElementById(`display-${id}`);
+        function runTick(id, end, name) {
+            clearTimeout(activeIntervals[id]);
             const card = document.getElementById(`card-${id}`);
+            const disp = document.getElementById(`display-${id}`);
+            const msg = document.getElementById(`msg-${id}`);
+            const btnRes = document.getElementById(`res-${id}`);
             const input = document.getElementById(`input-${id}`);
-            const btnS = document.getElementById(`btn-start-${id}`);
-            const btnR = document.getElementById(`btn-reset-${id}`);
-            const endTxt = document.getElementById(`end-${id}`);
+            const endTimeDisp = document.getElementById(`end-time-${id}`);
 
+            const duration = Math.floor((end - Date.now()) / 1000);
+            const endStr = new Date(end).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+
+            card.classList.add('running-mode');
             input.readOnly = true;
-            btnS.style.display = 'none';
-            btnR.style.display = 'block';
-            card.classList.add('running');
-            endTxt.innerText = "Selesai jam: " + new Date(end).toLocaleTimeString('id-ID',{hour:'2-digit', minute:'2-digit'});
+            card.querySelector('.start-btn').style.display = 'none';
+            btnRes.style.display = 'block';
+            endTimeDisp.textContent = `Selesai: ${endStr}`;
 
-            activeIntervals[id] = setInterval(() => {
-                const now = Date.now();
-                const diff = Math.floor((end - now) / 1000);
+            if (duration > 0) {
+                const h = String(Math.floor(duration/3600)).padStart(2,'0');
+                const m = String(Math.floor((duration%3600)/60)).padStart(2,'0');
+                const s = String(duration%60).padStart(2,'0');
+                disp.textContent = `${h}:${m}:${s}`;
 
-                if (diff <= 0) {
-                    clearInterval(activeIntervals[id]);
-                    display.innerText = "WAKTU HABIS!";
-                    card.classList.add('alert');
-                    btnR.innerText = "STOP & AMBIL";
-                    btnR.className = "btn btn-stop";
-                    triggerAlarm(id);
-                } else {
-                    const hrs = Math.floor(diff / 3600);
-                    const mins = Math.floor((diff % 3600) / 60);
-                    const secs = diff % 60;
-                    display.innerText = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+                if (duration <= 900) { // Fase Warning 15 menit
+                    card.classList.add('warning');
+                    msg.style.display = 'block';
+                    msg.textContent = `🔔 Sisa ${Math.ceil(duration/60)} mnt!`;
+                    if (duration % 60 === 0) speak(`Bahan ${name} segera siap.`);
                 }
-            }, 1000);
+                activeIntervals[id] = setTimeout(() => runTick(id, end, name), 1000);
+            } else {
+                disp.textContent = "HABIS!";
+                card.classList.replace('warning', 'alert');
+                btnRes.classList.add('stop-alarm-btn');
+                btnRes.textContent = "STOP & AMBIL";
+                document.body.classList.add('flash-alarm-red');
+                speak(`Waktu thawing ${name} habis! Segera ambil bahan!`);
+                activeIntervals[id] = setTimeout(() => runTick(id, end, name), 5000);
+            }
         }
 
-        function clearLocalTimer(id) {
-            clearInterval(activeIntervals[id]);
-            const item = THAWING_ITEMS.find(i => i.id === id);
+        function stopTick(id, defaultTime) {
+            clearTimeout(activeIntervals[id]);
             const card = document.getElementById(`card-${id}`);
             if (!card) return;
-
-            card.className = 'timer-card';
-            document.getElementById(`display-${id}`).innerText = "00:00:00";
+            card.classList.remove('running-mode', 'warning', 'alert');
+            document.getElementById(`display-${id}`).textContent = "00:00:00";
             document.getElementById(`input-${id}`).readOnly = false;
-            document.getElementById(`input-${id}`).value = item.time;
-            document.getElementById(`btn-start-${id}`).style.display = 'block';
-            const rb = document.getElementById(`btn-reset-${id}`);
-            rb.style.display = 'none';
-            rb.innerText = "RESET";
-            rb.className = "btn btn-reset";
-            document.getElementById(`end-${id}`).innerText = "Standby";
+            card.querySelector('.start-btn').style.display = 'block';
+            document.getElementById(`res-${id}`).style.display = 'none';
+            document.getElementById(`res-${id}`).classList.remove('stop-alarm-btn');
+            document.getElementById(`msg-${id}`).style.display = 'none';
+            document.getElementById(`end-time-${id}`).textContent = 'Ready';
         }
 
-        // 4. ALARM SYSTEM
-        let globalAlarmId = null;
-        function triggerAlarm(id) {
-            if (globalAlarmId) return;
-            const item = THAWING_ITEMS.find(i => i.id === id);
-            globalAlarmId = setInterval(() => {
-                document.body.classList.toggle('flash-red');
-                if ('speechSynthesis' in window && !speechSynthesis.speaking) {
-                    const utter = new SpeechSynthesisUtterance(`${item.name} HABIS`);
-                    utter.lang = 'id-ID';
-                    speechSynthesis.speak(utter);
-                }
-            }, 1000);
-        }
+        window.triggerStart = (id) => {
+            window.speechSynthesis.speak(new SpeechSynthesisUtterance("")); // Unblock Audio
+            const mins = document.getElementById(`input-${id}`).value;
+            currentDbRef.child(id).set({ endTime: Date.now() + (mins * 60 * 1000) });
+        };
 
-        function stopGlobalAlarm() {
-            clearInterval(globalAlarmId);
-            globalAlarmId = null;
-            document.body.classList.remove('flash-red');
-            if ('speechSynthesis' in window) speechSynthesis.cancel();
+        window.triggerReset = (id) => {
+            document.body.classList.remove('flash-alarm-red');
+            window.speechSynthesis.cancel();
+            speechQueue = [];
+            isSpeaking = false;
+            currentDbRef.child(id).remove();
+        };
+
+        function cleanup() {
+            if (currentDbRef) currentDbRef.off();
+            Object.values(activeIntervals).forEach(clearTimeout);
+            activeIntervals = {};
+            window.speechSynthesis.cancel();
+            document.body.classList.remove('flash-alarm-red');
         }
     </script>
 </body>
