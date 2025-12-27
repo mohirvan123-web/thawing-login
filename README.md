@@ -163,7 +163,7 @@
         }
         
         const dbRef = firebase.database().ref('thawingTimers');
-        const SPREADSHEET_URL = "[https://script.google.com/macros/s/AKfycbybjUmJsd4TzeXCpNkquddhjK0b0uOdA6ghjViR2boE6vjuWnutcmh3aQE7QBijbU5W/exec](https://script.google.com/macros/library/d/1J3eUO-aGaSTO1my-NOH9JpdMDYzFUAvscIbrTvcfAua_h5VmU6XYv3W4/1)";
+        const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbwFXw1vNzCzsMIm4BDysaC1qcJzcbByyQvTrPrNilnv5Z7sJT8u_IzNgV_uoaIWvI9F/exec";
 
         // --- KONFIGURASI ITEM ---
         const THAWING_ITEMS = [
