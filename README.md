@@ -864,6 +864,7 @@ function tick(itemId, endTimeMs, inputMinutes, state) {
   const card  = document.getElementById(`card-${itemId}`);
   const disp  = document.getElementById(`disp-${itemId}`);
   const badge = document.getElementById(`badge-${itemId}`);
+  const stlbl = document.getElementById(`stlabel-${itemId}`);
   const etlbl = document.getElementById(`etlabel-${itemId}`);
   const amsg  = document.getElementById(`amsg-${itemId}`);
   const inp   = document.getElementById(`inp-${itemId}`);
@@ -877,8 +878,11 @@ function tick(itemId, endTimeMs, inputMinutes, state) {
   inp.value         = inputMinutes;
   sbtn.style.display = 'none';
   rbtn.style.display = 'block';
-  rbtn.textContent   = 'RESET';
-  rbtn.className     = 'btn-reset';
+
+  const startFmt = state.startedAt
+    ? new Date(state.startedAt).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})
+    : '—';
+  stlbl.textContent = `Mulai: ${startFmt}`;
 
   const endFmt = new Date(endTimeMs).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
   etlbl.textContent = `Selesai: ${endFmt}`;
@@ -886,6 +890,8 @@ function tick(itemId, endTimeMs, inputMinutes, state) {
   const duration = Math.floor((endTimeMs - Date.now()) / 1000);
 
   if (duration > 0) {
+    rbtn.textContent = 'RESET';
+    rbtn.className   = 'btn-reset';
     disp.textContent = fmtTime(duration);
 
     if (duration <= WARNING_SECS) {
@@ -904,11 +910,7 @@ function tick(itemId, endTimeMs, inputMinutes, state) {
     activeIntervals[itemId] = setTimeout(() => tick(itemId, endTimeMs, inputMinutes, state), 1000);
 
   } else {
-    // DONE
-    clearTimeout(activeIntervals[itemId]);
-    delete activeIntervals[itemId];
-    if (state) dbTimerRef.child(itemId).remove().catch(()=>{});
-
+    // DONE — tandai status 'done' di DB, JANGAN dihapus di sini
     disp.textContent = '⏰ WAKTU HABIS!';
     setCardState(card, badge, 'done');
     const name = THAWING_ITEMS.find(i=>i.id===itemId)?.name || itemId;
@@ -916,10 +918,13 @@ function tick(itemId, endTimeMs, inputMinutes, state) {
     rbtn.textContent = '✅ SELESAI & AMBIL';
     rbtn.className   = 'btn-stop';
     sbtn.style.display = 'none';
-    triggerAlarm(name);
+
+    if (state.status !== 'done') {
+      dbTimerRef.child(itemId).update({ status: 'done' }).catch(()=>{});
+      triggerAlarm(name);
+    }
   }
 }
-
 // ════════════════════════════════════════════
 // START / RESET TIMER
 // ════════════════════════════════════════════
@@ -936,10 +941,12 @@ function startTimer(itemId) {
 
   const endTimeMs = Date.now() + mins * 60 * 1000;
 
-  dbTimerRef.child(itemId).set({
+    dbTimerRef.child(itemId).set({
     endTime: endTimeMs, inputMinutes: mins,
-    startedAt: Date.now(), startedBy: session.name
+    startedAt: Date.now(), startedBy: session.name,
+    status: 'running'
   })
+  
   .then(() => logThawingStart(itemId, mins, endTimeMs))
   .catch(err => {
     console.error(err);
