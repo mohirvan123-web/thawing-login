@@ -891,7 +891,7 @@ function tick(itemId, endTimeMs, inputMinutes, state) {
       setCardState(card, badge, 'warning');
       const remMins = Math.ceil(duration / 60);
       setAlarmMsg(amsg, 'warning', `⚠️ Sisa ${remMins} menit! Segera bersiap.`);
-      if (duration % 30 === 0) {
+      if (duration % 300 === 0) {
         const name = THAWING_ITEMS.find(i=>i.id===itemId)?.name || itemId;
         enqueueSpeak(`Perhatian! Thawing ${name} sisa ${remMins} menit.`);
       }
