@@ -817,7 +817,8 @@ function buildTimerGrid() {
         <span class="card-badge badge-idle" id="badge-${item.id}">Idle</span>
       </div>
       <div class="countdown-display" id="disp-${item.id}">${fmtTime(item.defaultMinutes*60)}</div>
-      <div class="end-time-label" id="etlabel-${item.id}">—</div>
+      <div class="end-time-label" id="stlabel-${item.id}">Mulai: —</div>
+      <div class="end-time-label" id="etlabel-${item.id}">Selesai: —</div>
       <div class="alarm-msg" id="amsg-${item.id}"></div>
       <div class="card-controls">
         <div class="duration-wrap">
