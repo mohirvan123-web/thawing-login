@@ -987,6 +987,7 @@ function resetCardUI(itemId, defaultMinutes) {
   const card  = document.getElementById(`card-${itemId}`);
   const disp  = document.getElementById(`disp-${itemId}`);
   const badge = document.getElementById(`badge-${itemId}`);
+  const stlbl = document.getElementById(`stlabel-${itemId}`);
   const etlbl = document.getElementById(`etlabel-${itemId}`);
   const amsg  = document.getElementById(`amsg-${itemId}`);
   const inp   = document.getElementById(`inp-${itemId}`);
@@ -995,7 +996,8 @@ function resetCardUI(itemId, defaultMinutes) {
   if (!card) return;
   setCardState(card, badge, 'idle');
   disp.textContent  = fmtTime(defaultMinutes*60);
-  etlbl.textContent = '—';
+  stlbl.textContent = 'Mulai: —';
+  etlbl.textContent = 'Selesai: —';
   amsg.className    = 'alarm-msg'; amsg.textContent = '';
   inp.readOnly = false; inp.value = defaultMinutes;
   sbtn.textContent = 'START'; sbtn.classList.remove('syncing');
