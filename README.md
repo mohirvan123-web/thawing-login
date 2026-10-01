@@ -628,6 +628,8 @@ const THAWING_ITEMS = [
   { id: 'krupuk_mie',    name: 'KRUPUK MIE',     defaultMinutes: 120 },
   { id: 'kulit_pangsit', name: 'KULIT PANGSIT',  defaultMinutes: 120 },
   { id: 'udang_keju',    name: 'UDANG KEJU',     defaultMinutes: 120 },
+  { id: 'udang_keju',    name: 'UDANG KEJU',     defaultMinutes: 120 },
+  { id: 'tiris_cabe',    name: 'TIRIS CABE',     defaultMinutes: 120 },
 ];
 
 // Kode khusus admin (ganti sesuai keinginan)
